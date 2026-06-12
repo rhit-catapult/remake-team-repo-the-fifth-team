@@ -34,7 +34,7 @@ class Block:
 
 def test_block():
     screen = pygame.display.set_mode((640, 480))
-    block = Block(screen, 50, 50, 600, 200, 2, "normal", (0, 0, 0), 5, (150, 150, 150))
+    block = Block(screen, 50, 50, 600, 200, 2, "spike", (0, 0, 0), 5, (150, 150, 150))
     clock = pygame.time.Clock()
     while True:
         clock.tick(60)
@@ -46,4 +46,4 @@ def test_block():
         block.update()
         block.draw()
         pygame.display.update()
-test_block()
+# test_block()
