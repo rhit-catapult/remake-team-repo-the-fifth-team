@@ -1,6 +1,6 @@
 import pygame
 import sys
-import my_character
+import cube
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
     screen = pygame.display.set_mode((640, 480))
     
     # creates a Character from the my_character.py file
-    character = my_character.Character(screen, 100, 380)
+    character = cube.Character(screen, 100, 380)
 
     # let's set the framerate
     clock = pygame.time.Clock()

@@ -1,6 +1,6 @@
 import pygame
 import sys
-import my_character
+import cube
 import random
 import time
 class Block:
