@@ -1,121 +1,213 @@
 import pygame
 import sys
-import my_character
-import random
-import time
+import json
+import os
+
+pygame.init()
+
+W, H = 900, 320
+screen = pygame.display.set_mode((W, H))
+pygame.display.set_caption("Cube Jump")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont("sans", 22)
+big_font = pygame.font.SysFont("sans", 36)
+
+BG_COLOR = (20, 24, 60)
+GRID_COLOR = (40, 48, 100)
+GROUND_COLOR = (30, 34, 80)
+CUBE_COLOR = (0, 230, 200)
+SPIKE_COLOR = (255, 80, 120)
+BLOCK_COLOR = (120, 90, 255)
+TEXT_COLOR = (255, 255, 255)
+MSG_COLOR = (160, 170, 220)
+
+GROUND_Y = H - 60
+BEST_FILE = "cube_jump_best.json"
 
 
+def load_best():
+    if os.path.exists(BEST_FILE):
+        try:
+            with open(BEST_FILE, "r") as f:
+                return json.load(f).get("best", 0)
+        except Exception:
+            return 0
+    return 0
 
 
-class Character:
-    def __init__(self, screen: pygame.Surface, x, y):
-        self.screen = screen
-        self.x = x
-        self.y = y
-        self.speed = 5
-        self.velocity_y = 0
-        self.gravity = 0.5
-        self.jump_power = 12
-        self.ground_level = screen.get_height() - 20  # Floor is at the bottom of the screen
-        self.is_jumping = False
+def save_best(value):
+    try:
+        with open(BEST_FILE, "w") as f:
+            json.dump({"best": value}, f)
+    except Exception:
+        pass
 
-    def move(self, dx, dy=0):
-        """Move the character horizontally by dx pixels"""
-        self.x += dx * self.speed
-        # Keep character within screen bounds horizontally
-        self.x = max(0, min(self.x, self.screen.get_width() - 20))
+
+class Cube:
+    def __init__(self):
+        self.size = 32
+        self.x = 80
+        self.y = GROUND_Y - self.size
+        self.vy = 0
+        self.gravity = 0.8
+        self.jump_strength = -13
+        self.on_ground = True
+        self.rotation = 0
+
+    def reset(self):
+        self.y = GROUND_Y - self.size
+        self.vy = 0
+        self.on_ground = True
+        self.rotation = 0
 
     def jump(self):
-        """Make the character jump if on the ground"""
-        if not self.is_jumping:
-            self.velocity_y = -self.jump_power
-            self.is_jumping = True
-
+        if self.on_ground:
+            self.vy = self.jump_strength
+            self.on_ground = False
 
     def update(self):
-        """Update character physics (gravity and jumping)"""
-        self.velocity_y += self.gravity
-        self.y += self.velocity_y
+        self.vy += self.gravity
+        self.y += self.vy
+        if self.y >= GROUND_Y - self.size:
+            self.y = GROUND_Y - self.size
+            self.vy = 0
+            if not self.on_ground:
+                self.rotation = 0
+            self.on_ground = True
+        else:
+            self.rotation = (self.rotation + 8) % 360
 
-        # Keep character within screen bounds vertically
-        if self.y <= 0:  # Prevent going above the screen
-            self.y = 0
-            self.velocity_y = 0
-        
-        # Check if character reached ground level
-        if self.y >= self.ground_level:
-            self.y = self.ground_level
-            self.velocity_y = 0
-            self.is_jumping = False
+    def rect(self):
+        return pygame.Rect(self.x, self.y, self.size, self.size)
 
-    def draw(self):
-        pygame.draw.rect(self.screen, "blue", (self.x, self.y, 20, 20))
-        pygame.draw.circle(self.screen, "red", (self.x + 5, self.y + 5), 3)
-        pygame.draw.circle(self.screen, "red", (self.x + 15, self.y + 5), 3)
+    def draw(self, surface):
+        cx = self.x + self.size / 2
+        cy = self.y + self.size / 2
+        surf = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
+        pygame.draw.rect(surf, CUBE_COLOR, (0, 0, self.size, self.size), border_radius=4)
+        pygame.draw.rect(surf, (255, 255, 255), (0, 0, self.size, self.size), 2, border_radius=4)
+        rotated = pygame.transform.rotate(surf, -self.rotation)
+        rect = rotated.get_rect(center=(cx, cy))
+        surface.blit(rotated, rect.topleft)
 
 
-# This function is called when you run this file, and is used to test the Character class individually.
-# When you create more files with different classes, copy the code below, then
-# change it to properly test that class
-def test_character():
-    # TODO: change this function to test your class
-    screen = pygame.display.set_mode((640, 480))
-    character = Character(screen, 400, 400)
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
+class Spike:
+    def __init__(self, x):
+        self.x = x
+        self.size = 30
 
-        screen.fill("white")
-        character.draw()
-        pygame.display.update()
+    def rect(self):
+        return pygame.Rect(self.x + 6, GROUND_Y - self.size, self.size - 12, self.size)
+
+    def update(self, speed):
+        self.x -= speed
+
+    def draw(self, surface):
+        points = [
+            (self.x, GROUND_Y),
+            (self.x + self.size / 2, GROUND_Y - self.size),
+            (self.x + self.size, GROUND_Y),
+        ]
+        pygame.draw.polygon(surface, SPIKE_COLOR, points)
+        pygame.draw.polygon(surface, (255, 255, 255), points, 1)
+
+
+class Block:
+    def __init__(self, x, height):
+        self.x = x
+        self.size = 32
+        self.height = height
+
+    def rect(self):
+        return pygame.Rect(self.x, GROUND_Y - self.height, self.size, self.height)
+
+    def update(self, speed):
+        self.x -= speed
+
+    def draw(self, surface):
+        r = self.rect()
+        pygame.draw.rect(surface, BLOCK_COLOR, r, border_radius=4)
+        pygame.draw.rect(surface, (255, 255, 255), r, 2, border_radius=4)
+
+
+def build_level():
+    """Empty level - no obstacles."""
+    return []
+
+
+class Game:
+    def __init__(self):
+        self.best = load_best()
+        self.reset()
+
+    def reset(self):
+        self.cube = Cube()
+        self.cube.reset()
+        self.obstacles = build_level()
+        self.speed = 6
+        self.distance = 0
+        self.score = 0
+        self.message = "Press SPACE / click to jump."
+
+    def update(self):
+        self.cube.update()
+        self.distance += self.speed
+        self.score = int(self.distance / 10)
+
+    def draw(self, surface):
+        surface.fill(BG_COLOR)
+
+        for gx in range(0, W, 40):
+            pygame.draw.line(surface, GRID_COLOR, (gx, 0), (gx, H), 1)
+        for gy in range(0, H, 40):
+            pygame.draw.line(surface, GRID_COLOR, (0, gy), (W, gy), 1)
+
+        pygame.draw.rect(surface, GROUND_COLOR, (0, GROUND_Y, W, H - GROUND_Y))
+        pygame.draw.line(surface, CUBE_COLOR, (0, GROUND_Y), (W, GROUND_Y), 2)
+
+        for obs in self.obstacles:
+            if -50 < obs.x < W + 50:
+                obs.draw(surface)
+
+        self.cube.draw(surface)
+
+
+def draw_hud(surface, game):
+    score_text = font.render(f"Score: {game.score}", True, TEXT_COLOR)
+    best_text = font.render(f"Best: {game.best}", True, TEXT_COLOR)
+    surface.blit(score_text, (10, 10))
+    surface.blit(best_text, (150, 10))
+
+    msg_text = font.render(game.message, True, MSG_COLOR)
+    surface.blit(msg_text, (W / 2 - msg_text.get_width() / 2, H - 24))
 
 
 def main():
-    # turn on pygame
-    pygame.init()
+    game = Game()
 
-    # create a screen
-    pygame.display.set_caption("Cool Project")
-    # TODO: Change the size of the screen as you see fit!
-    screen = pygame.display.set_mode((640, 480))
-    # creates a Character from the my_character.py file
-    character = my_character.Character(screen,100, 400)
-
-    # let's set the framerate
-    clock = pygame.time.Clock()
-    while True:
-        clock.tick(60)  # this sets the framerate of your game
+    running = True
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                sys.exit()
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    game.cube.jump()
+                elif event.key == pygame.K_ESCAPE:
+                    running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                game.cube.jump()
 
-            # TODO: Add you events code
+        game.update()
+        game.draw(screen)
+        draw_hud(screen, game)
 
-        # Handle continuous key presses for movement
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            character.move(-1)
-        if keys[pygame.K_RIGHT]:
-            character.move(1)
-        if keys[pygame.K_SPACE]:
-            character.jump()
+        pygame.display.flip()
+        clock.tick(60)
 
-        
-        # Update character physics
-        character.update()
-
-        # TODO: Fill the screen with whatever background color you like!
-        screen.fill((255, 255, 255))
-
-        # draws the character every frame
-        character.draw()
-
-        # TODO: Add your project code
-
-        # don't forget the update, otherwise nothing will show up!
-        pygame.display.update()
+    pygame.quit()
+    sys.exit()
 
 
-
-main()
+if __name__ == "__main__":
+    main()
