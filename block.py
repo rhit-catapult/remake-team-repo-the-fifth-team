@@ -31,6 +31,8 @@ class Block:
                 pygame.draw.line(self.screen, self.border_color, (self.x, self.y), (self.x + self.width / 2, self.y + self.height), self.border)
                 pygame.draw.line(self.screen, self.border_color, (self.x, self.y), (self.x - self.width / 2, self.y + self.height), self.border)
                 pygame.draw.line(self.screen, self.border_color, (self.x - self.width / 2, self.y + self.height), (self.x + self.width / 2, self.y + self.height), self.border)
+    def off_screen(self):
+        return self.x < -self.width
 
 def test_block():
     screen = pygame.display.set_mode((640, 480))
