@@ -25,15 +25,18 @@ class Map:
         if type == 0:
             if self.blocks[len(self.blocks) - 1].x <= self.screen.get_width():
                 comp = 20
-                if self.last_gen == -1:
+                if self.last_gen < 0:
                     self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 40, 5, "normal", (0, 0, 0), 5, (150, 150, 150)))
                 else:
                     self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 40, 5, "normal", (0, 0, 0), 5, (150, 150, 150)))
                 self.count += 1
-                if self.count != 2:
-                    self.last_gen = 0
-                if self.count == 2 and self.last_gen == -1:
-                    pick = random.randint(-2, 3)
+                # if self.count != 2:
+                #     self.last_gen = 0
+                if self.count == 1 and self.last_gen < 0:
+                    if(random.random() < 0.3):
+                        pick = self.last_gen
+                    else:
+                        pick = random.randint(-2, 3)
                     if pick < 0:
                         self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 60 - comp, self.screen.get_height() - 80, 5, "spike", (0, 0, 0), 5, (150, 150, 150)))
                     elif pick == 1:
@@ -46,8 +49,11 @@ class Map:
                             self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 160 + i * 40, 5, "normal", (0, 0, 0), 5, (150, 150, 150)))
                     self.last_gen = pick
                     self.count = 0
-                elif self.count == 2:
-                    pick = random.randint(-1, 3)
+                elif self.count == 1:
+                    if(random.random() < 0.2):
+                        pick = self.last_gen
+                    else:
+                        pick = random.randint(-2, 3)
                     if pick == -1:
                         self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 60, self.screen.get_height() - 80, 5, "spike", (0, 0, 0), 5, (150, 150, 150)))
                     elif pick == 1:
