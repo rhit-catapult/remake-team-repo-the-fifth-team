@@ -18,10 +18,14 @@ class Cube:
         self.jump_strength = -18
         self.on_ground = True
         self.color = color
+        self.color_backup = color
         self.rotation = 0
         self.map = map
+        self.loss = False
 
     def reset(self):
+        self.loss = False
+        self.color = self.color_backup
         self.y = self.screen.get_height() - 40 - self.size
         self.vy = 0
         self.on_ground = True
@@ -68,14 +72,22 @@ class Cube:
         return False
 
     def update(self):
+        if self.loss:
+            self.vy = 0
+            self.map.speed = 0
         self.y += self.vy
         count_collisions = 0
         for block in self.map.blocks:
-            # Check side collision with normal blocks
-            if (self.x + self.size >= block.x and self.x + self.size <= block.x + 3 and self.y + self.size > block.y and self.y < block.y + block.height and block.y < self.screen.get_height() - 40):
+            if (self.x + self.size >= block.x and self.x + self.size <= block.x + 2 and self.y + self.size > block.y and self.y < block.y + block.height and block.y < self.screen.get_height() - 40):
                 self.color = (255, 0, 0)
+                self.vy = 0
+                self.loss = True
+                self.map.speed = 0
             elif block.type == "spike" and self.check_triangle_collision(block):
                 self.color = (255, 0, 0)
+                self.vy = 0
+                self.loss = True
+                self.map.speed = 0
             elif block.x >= self.x - self.size and block.x <= self.x + self.size and self.y >= block.y - self.size and block.y < self.screen.get_height() - 40 and block.type == "normal":
                 self.y = block.y - self.size
                 self.vy = 0
@@ -89,7 +101,7 @@ class Cube:
             if not self.on_ground:
                 self.rotation = 0
             self.on_ground = True
-        elif count_collisions == 0:
+        elif count_collisions == 0 and not self.loss:
             self.on_ground = False
             self.rotation = (self.rotation + 8) % 360
             self.vy += self.gravity
