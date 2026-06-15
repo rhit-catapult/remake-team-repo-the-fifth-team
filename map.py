@@ -188,7 +188,7 @@ class Map:
                             self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 80 - (h * 40), self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
                 
                 # OUTRO (150-169.3s): Cool down with moderate vertical sections
-                else:
+                elif current_time < 169.3:
                     pattern = block_count % 22
                     if pattern == 21:  # Occasional spike
                         self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))

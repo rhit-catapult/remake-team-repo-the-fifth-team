@@ -78,7 +78,7 @@ class Cube:
         self.y += self.vy
         count_collisions = 0
         for block in self.map.blocks:
-            if (self.x + self.size >= block.x and self.x + self.size <= block.x + 2 and self.y + self.size > block.y and self.y < block.y + block.height and block.y < self.screen.get_height() - 40):
+            if (self.x + self.size >= block.x and self.x + self.size < block.x + 2 and self.y + self.size > block.y and self.y < block.y + block.height and block.y < self.screen.get_height() - 40):
                 self.color = (255, 0, 0)
                 self.vy = 0
                 self.loss = True
