@@ -128,6 +128,10 @@ class Cube:
                     self.rotation = 0
                 self.on_ground = True
         if self.y >= self.screen.get_height() - 40 - self.size and not flipped or self.y <= 40 and flipped:
+            if flipped:
+                self.y = 40
+            else:
+                self.y = self.screen.get_height() - 40 - self.size
             self.vy = 0
             if not self.on_ground:
                 self.rotation = 0
