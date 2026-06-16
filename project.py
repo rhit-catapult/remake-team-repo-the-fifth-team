@@ -48,6 +48,11 @@ def main():
     running = True
     while running:
         clock.tick(60)
+        # Check for held inputs
+        keys = pygame.key.get_pressed()
+        mouse_buttons = pygame.mouse.get_pressed()
+        cube1.jump_requested = (keys[pygame.K_SPACE] or mouse_buttons[0]) and menu1.mode in ["infinite", "level_1"]
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -57,6 +62,8 @@ def main():
                 elif event.key == pygame.K_ESCAPE:
                     running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and menu1.mode == "infinite":
+                cube1.jump()
+            elif event.type == pygame.MOUSEBUTTONDOWN and menu1.mode == "level_1":
                 cube1.jump()
             elif event.type == pygame.MOUSEBUTTONDOWN and menu1.mode == "main":
                 mouse_pos = pygame.mouse.get_pos()

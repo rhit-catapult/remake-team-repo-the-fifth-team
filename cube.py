@@ -22,6 +22,7 @@ class Cube:
         self.rotation = 0
         self.map = map
         self.loss = False
+        self.jump_requested = False
 
     def reset(self):
         self.loss = False
@@ -77,6 +78,7 @@ class Cube:
             self.map.speed = 0
         self.y += self.vy
         count_collisions = 0
+        was_on_ground = self.on_ground
         for block in self.map.blocks:
             if (self.x + self.size >= block.x and self.x + self.size < block.x + 2 and self.y + self.size > block.y and self.y < block.y + block.height and block.y < self.screen.get_height() - 40):
                 self.color = (255, 0, 0)
@@ -105,6 +107,10 @@ class Cube:
             self.on_ground = False
             self.rotation = (self.rotation + 8) % 360
             self.vy += self.gravity
+        
+        # Auto-jump when landing if jump is requested
+        if self.on_ground and not was_on_ground and self.jump_requested and not self.loss:
+            self.jump()
             
 
     def rect(self):
