@@ -33,14 +33,14 @@ def main():
     pygame.init()
     W, H = 1200, 700
     screen = pygame.display.set_mode((W, H))
-    pygame.display.set_caption("Cube Jump")
+    pygame.display.set_caption("Algebra Run")
     clock = pygame.time.Clock()
     map_type = 0
     block_list = []
     for i in range(31):
         block_list.append(block.Block(screen, 40, 40, 40 * i, screen.get_height() - 40, 5, "normal", (0, 0, 0), 5, (150, 150, 150)))
     map1 = map.Map(screen, block_list, 6, "Background.png", 3)
-    cube1 = cube.Cube(screen, (0, 200, 200), map1)
+    cube1 = cube.Cube(screen, (0, 255, 0), map1)
     menu1 = menu.Menu(screen, "main", cube1)
     inf_reset = True
     level_reset = True
