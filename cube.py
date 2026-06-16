@@ -38,9 +38,12 @@ class Cube:
 
     def check_triangle_collision(self, block):
         x1, y1 = block.x, block.y
-        x2, y2 = block.x - block.width / 2, block.y + block.height
-        x3, y3 = block.x + block.width / 2, block.y + block.height
-        
+        if not block.flipped:
+            x2, y2 = block.x - block.width / 2, block.y + block.height
+            x3, y3 = block.x + block.width / 2, block.y + block.height
+        else:
+            x2, y2 = block.x - block.width / 2, block.y - block.height
+            x3, y3 = block.x + block.width / 2, block.y - block.height
         def sign(px, py, ax, ay, bx, by):
             return (px - bx) * (ay - by) - (ax - bx) * (py - by)
         
@@ -73,6 +76,15 @@ class Cube:
         return False
 
     def update(self):
+        self.jump_strength = -18
+        self.gravity = 0.8
+        flipped = False
+        for block in self.map.blocks:
+            if block.flipped and block.x <= self.x + self.size and block.x + block.width >= self.x:
+                self.jump_strength = 18
+                self.gravity = -0.8
+                flipped = True
+            
         if self.loss:
             self.vy = 0
             self.map.speed = 0
@@ -80,25 +92,42 @@ class Cube:
         count_collisions = 0
         was_on_ground = self.on_ground
         for block in self.map.blocks:
-            if (self.x + self.size >= block.x and self.x + self.size < block.x + 2 and self.y + self.size > block.y and self.y < block.y + block.height and block.y < self.screen.get_height() - 40):
+            if not block.flipped and self.x + self.size >= block.x and self.x + self.size < block.x + 2 and self.y + self.size > block.y and self.y < block.y + block.height and block.y < self.screen.get_height() - 40:
                 self.color = (255, 0, 0)
                 self.vy = 0
                 self.loss = True
                 self.map.speed = 0
-            elif block.type == "spike" and self.check_triangle_collision(block):
+            elif not block.flipped and block.type == "spike" and self.check_triangle_collision(block):
                 self.color = (255, 0, 0)
                 self.vy = 0
                 self.loss = True
                 self.map.speed = 0
-            elif block.x >= self.x - self.size and block.x <= self.x + self.size and self.y >= block.y - self.size and block.y < self.screen.get_height() - 40 and block.type == "normal":
+            elif not block.flipped and block.x >= self.x - self.size and block.x <= self.x + self.size and self.y >= block.y - self.size and block.y < self.screen.get_height() - 40 and block.type == "normal":
                 self.y = block.y - self.size
                 self.vy = 0
                 count_collisions += 1
                 if not self.on_ground:
                     self.rotation = 0
                 self.on_ground = True
-        if self.y >= self.screen.get_height() - 40 - self.size:
-            self.y = self.screen.get_height() - 40 - self.size
+        for block in self.map.blocks:
+            if block.flipped and self.x + self.size >= block.x and self.x + self.size < block.x + 2 and self.y < block.y + block.height and self.y + self.size > block.y and block.y > 40:
+                self.color = (255, 0, 0)
+                self.vy = 0
+                self.loss = True
+                self.map.speed = 0
+            elif block.flipped and block.type == "spike" and self.check_triangle_collision(block):
+                self.color = (255, 0, 0)
+                self.vy = 0
+                self.loss = True
+                self.map.speed = 0
+            elif block.flipped and block.x >= self.x - self.size and block.x <= self.x + self.size and self.y <= block.y + block.height and block.type == "normal":
+                self.y = block.y + block.height
+                self.vy = 0
+                count_collisions += 1
+                if not self.on_ground:
+                    self.rotation = 0
+                self.on_ground = True
+        if self.y >= self.screen.get_height() - 40 - self.size and not flipped or self.y <= 40 and flipped:
             self.vy = 0
             if not self.on_ground:
                 self.rotation = 0

@@ -11,23 +11,24 @@ class Map:
         self.speed = speed
         self.last_gen = 0
         self.count = 0
-        self.bg1 = pygame.transform.scale(pygame.image.load(bg), (1200, 660))
-        self.bg2 = pygame.transform.scale(pygame.image.load(bg), (1200, 660))
+        self.bg1 = pygame.transform.scale(pygame.image.load(bg), (1500, 700))
+        self.bg2 = pygame.transform.scale(pygame.image.load(bg), (1500, 700))
         self.bg_speed = bg_speed
         self.bg1_x = 0
         self.bg1_y = 0
-        self.bg2_x = self.screen.get_width()
+        self.bg2_x = 1500
         self.bg2_y = 0
         self.type = 0
         self.level_1_block_count = 0
         self.level_1_time_elapsed = 0
+        self.flipped = False
     def update_map(self):
         self.bg1_x -= self.bg_speed
         self.bg2_x -= self.bg_speed
-        if(self.bg1_x <= -1200):
-            self.bg1_x = self.screen.get_width()
-        if(self.bg2_x <= -1200):
-            self.bg2_x = self.screen.get_width()
+        if(self.bg1_x <= -1500):
+            self.bg1_x = 1500
+        if(self.bg2_x <= -1500):
+            self.bg2_x = 1500
         for block in self.blocks:
             block.speed = self.speed
             block.update()
@@ -46,48 +47,106 @@ class Map:
                 for i in range(31):
                     self.blocks.append(block.Block(self.screen, 40, 40, 40 * i, self.screen.get_height() - 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
             if self.blocks[len(self.blocks) - 1].x <= self.screen.get_width():
-                comp = 20
-                if self.last_gen < 0:
-                    self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                if not self.flipped:
+                    if random.random() < 0.0075:
+                        self.flipped = True
+                    comp = 20
+                    if self.last_gen < 0:
+                        self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                    else:
+                        self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                    self.count += 1
+                    # if self.count != 2:
+                    #     self.last_gen = 0
+                    if self.count == 1 and self.last_gen < 0:
+                        if random.random() < 0.1:
+                            pick = self.last_gen
+                        else:
+                            pick = random.randint(-2, 3)
+                        if pick < 0:
+                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 60 - comp, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                        elif pick == 1:
+                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 80, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                        elif pick == 2:
+                            for i in range(2):
+                                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 120 + i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                        elif pick == 3 and self.blocks[len(self.blocks) - 4].y > self.screen.get_height() - 40 and  self.blocks[len(self.blocks) - 4].type != "spike":
+                            for i in range(3):
+                                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 160 + i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                        self.last_gen = pick
+                        self.count = 0
+                    elif self.count == 1:
+                        if(random.random() < 0.5):
+                            pick = self.last_gen
+                        else:
+                            pick = random.randint(-2, 3)
+                        if pick == -1:
+                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 60, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                        elif pick == 1:
+                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 80, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                        elif pick == 2:
+                            for i in range(2):
+                                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 120 + i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                        elif pick == 3 and self.blocks[len(self.blocks) - 4].y > self.screen.get_height() - 40 and  self.blocks[len(self.blocks) - 4].type != "spike":
+                            for i in range(3):
+                                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 160 + i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                        self.last_gen = pick
+                        self.count = 0
                 else:
-                    self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
-                self.count += 1
-                # if self.count != 2:
-                #     self.last_gen = 0
-                if self.count == 1 and self.last_gen < 0:
-                    if random.random() < 0.1:
-                        pick = self.last_gen
+                    if random.random() < 0.012:
+                        self.flipped = False
+                    comp = 20
+                    if self.last_gen < 0:
+                        self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, 0, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                        self.blocks[len(self.blocks) - 1].flipped = True
                     else:
-                        pick = random.randint(-2, 3)
-                    if pick < 0:
-                        self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 60 - comp, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
-                    elif pick == 1:
-                        self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 80, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
-                    elif pick == 2:
-                        for i in range(2):
-                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 120 + i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
-                    elif pick == 3 and self.blocks[len(self.blocks) - 4].y > self.screen.get_height() - 40 and  self.blocks[len(self.blocks) - 4].type != "spike":
-                        for i in range(3):
-                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 160 + i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
-                    self.last_gen = pick
-                    self.count = 0
-                elif self.count == 1:
-                    if(random.random() < 0.5):
-                        pick = self.last_gen
-                    else:
-                        pick = random.randint(-2, 3)
-                    if pick == -1:
-                        self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 60, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
-                    elif pick == 1:
-                        self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 80, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
-                    elif pick == 2:
-                        for i in range(2):
-                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 120 + i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
-                    elif pick == 3 and self.blocks[len(self.blocks) - 4].y > self.screen.get_height() - 40 and  self.blocks[len(self.blocks) - 4].type != "spike":
-                        for i in range(3):
-                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, self.screen.get_height() - 160 + i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
-                    self.last_gen = pick
-                    self.count = 0
+                        self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, 0, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                        self.blocks[len(self.blocks) - 1].flipped = True
+                    self.count += 1
+                    # if self.count != 2:
+                    #     self.last_gen = 0
+                    if self.count == 1 and self.last_gen < 0:
+                        if random.random() < 0.1:
+                            pick = self.last_gen
+                        else:
+                            pick = random.randint(-2, 3)
+                        if pick < 0:
+                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 60 - comp, 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                            self.blocks[len(self.blocks) - 1].flipped = True
+                        elif pick == 1:
+                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                            self.blocks[len(self.blocks) - 1].flipped = True
+                        elif pick == 2:
+                            for i in range(2):
+                                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, 80 - i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                                self.blocks[len(self.blocks) - 1].flipped = True
+                        elif pick == 3 and self.blocks[len(self.blocks) - 4].y < 40 and  self.blocks[len(self.blocks) - 4].type != "spike":
+                            for i in range(3):
+                                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, 120 - i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                                self.blocks[len(self.blocks) - 1].flipped = True
+                        self.last_gen = pick
+                        self.count = 0
+                    elif self.count == 1:
+                        if(random.random() < 0.5):
+                            pick = self.last_gen
+                        else:
+                            pick = random.randint(-2, 3)
+                        if pick == -1:
+                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 60, 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                            self.blocks[len(self.blocks) - 1].flipped = True
+                        elif pick == 1:
+                            self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                            self.blocks[len(self.blocks) - 1].flipped = True
+                        elif pick == 2:
+                            for i in range(2):
+                                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, 80 - i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                                self.blocks[len(self.blocks) - 1].flipped = True
+                        elif pick == 3 and self.blocks[len(self.blocks) - 4].y < 40 and  self.blocks[len(self.blocks) - 4].type != "spike":
+                            for i in range(3):
+                                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40, 120 - i * 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                                self.blocks[len(self.blocks) - 1].flipped = True
+                        self.last_gen = pick
+                        self.count = 0
         elif self.type == 1:
             # Music-synchronized level generation for Level_1.mp3 (169.30 seconds)
             if reset_l:
@@ -206,7 +265,7 @@ def test_map():
     block_list = []
     for i in range(31):
         block_list.append(block.Block(screen, 40, 40, 40 * i, screen.get_height() - 40, 5, "normal", (0, 0, 0), 5, (150, 150, 150)))
-    map = Map(screen, block_list, 4)
+    map = Map(screen, block_list, 4, "Background.png", 2)
     clock = pygame.time.Clock()
     while True:
         clock.tick(60)
@@ -217,6 +276,6 @@ def test_map():
         screen.fill("white")
         map.update_map()
         map.draw_map()
-        map.generate(0)
+        map.generate(0, False)
         pygame.display.update()
 # test_map()
