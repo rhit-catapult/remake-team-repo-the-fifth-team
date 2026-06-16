@@ -171,8 +171,10 @@ def main():
         if menu1.mode == "main":
             menu1.draw_main_menu()      
         elif menu1.mode == "loss":
+            menu1.score = round(menu1.score, 2)
             menu1.draw_loss_ui(msg_number) 
         elif menu1.mode == "win":
+            menu1.score = round(menu1.score, 2)
             menu1.draw_win_ui(msg_number)
         else:
             map1.draw_background()
@@ -187,6 +189,7 @@ def main():
                 menu1.score += 100/10500
                 if menu1.score >= 100:
                     menu1.mode = "win"
+            menu1.score = round(menu1.score, 2)
             menu1.draw_game_ui()
             inf_reset = False
             level_reset = False
