@@ -22,6 +22,7 @@ class Map:
         self.level_1_block_count = 0
         self.level_1_time_elapsed = 0
         self.flipped = False
+        self.tutorial_block_count = 0
     def update_map(self):
         self.bg1_x -= self.bg_speed
         self.bg2_x -= self.bg_speed
@@ -39,14 +40,14 @@ class Map:
     def draw_map(self):
         for block in self.blocks:
             block.draw()
-    def generate(self, reset_i, reset_l):
+    def generate(self, reset_i, reset_l, reset_t):
         self.blocks = [bloc for bloc in self.blocks if not bloc.off_screen()]
         if self.type == 0:
             if reset_i:
                 self.blocks.clear()
                 for i in range(31):
                     self.blocks.append(block.Block(self.screen, 40, 40, 40 * i, self.screen.get_height() - 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
-            if self.blocks[len(self.blocks) - 1].x <= self.screen.get_width():
+            if self.blocks and self.blocks[len(self.blocks) - 1].x <= self.screen.get_width():
                 if not self.flipped:
                     if random.random() < 0.0075:
                         self.flipped = True
@@ -258,7 +259,32 @@ class Map:
                         pass
                 
                 self.level_1_block_count += 1
-            
+        elif self.type == 2:
+            if reset_t:
+                self.blocks.clear()
+                for i in range(31):
+                    self.blocks.append(block.Block(self.screen, 40, 40, 40 * i, self.screen.get_height() - 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                self.tutorial_block_count = 31
+            print(self.tutorial_block_count)
+            if self.blocks and self.blocks[len(self.blocks) - 1].x <= self.screen.get_width():
+                comp = 0
+                if self.blocks[len(self.blocks) - 1].type == "spike":
+                    comp = 20
+                self.blocks.append(block.Block(self.screen, 40, 40, self.screen.get_width() + 40 - comp, self.screen.get_height() - 40, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
+                self.tutorial_block_count += 1
+                if self.tutorial_block_count % 17 == 0:
+                    self.blocks.append(block.Block(self.screen, 40, 40, self.blocks[len(self.blocks) - 1].x + 20, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                elif self.tutorial_block_count % 17 == 1:
+                    self.blocks.append(block.Block(self.screen, 40, 40, self.blocks[len(self.blocks) - 1].x + 20, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                elif self.tutorial_block_count % 17 == 2:
+                    self.blocks.append(block.Block(self.screen, 40, 40, self.blocks[len(self.blocks) - 1].x + 20, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                elif self.tutorial_block_count % 17 == 3:
+                    self.blocks.append(block.Block(self.screen, 40, 40, self.blocks[len(self.blocks) - 1].x + 20, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                elif self.tutorial_block_count % 17 == 4:
+                    self.blocks.append(block.Block(self.screen, 40, 40, self.blocks[len(self.blocks) - 1].x + 20, self.screen.get_height() - 80, self.speed, "spike", (0, 0, 0), 5, (150, 150, 150)))
+                if self.tutorial_block_count % 17 == 11:
+                    for i in range(5):
+                        self.blocks.append(block.Block(self.screen, 40, 40, self.blocks[len(self.blocks) - 1].x, self.screen.get_height() - 40 * i - 80, self.speed, "normal", (0, 0, 0), 5, (150, 150, 150)))
 
 def test_map():
     screen = pygame.display.set_mode((1200, 700))

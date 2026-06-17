@@ -22,6 +22,9 @@ class Menu:
         self.font2 = pygame.font.SysFont("segoeuiemoji", 30)
         self.font_special = pygame.font.SysFont("wingdings", 60)
         self.font_label = pygame.font.SysFont("segoeuiemoji", 15)
+        self.font3 = pygame.font.SysFont("segoeuiemoji", 15)
+        self.help_width = 60
+        self.help_height = 30
     def draw_main_menu(self):
         self.screen.fill((0, 0, 0))
         title = self.font.render("ALGEBRA RUN", True, self.text_color)
@@ -34,6 +37,10 @@ class Menu:
         self.screen.blit(button2_label, (self.screen.get_width() / 2 - button2_label.get_width() / 2, self.screen.get_height() / 2 + self.main_button_height * 2 - button1_label.get_height() / 2))
         other_title = self.font2.render("By The Fifth Team" , True, (255, 255, 255))
         self.screen.blit(other_title, (self.screen.get_width() - other_title.get_width(), self.screen.get_height() - other_title.get_height()))
+        pygame.draw.rect(self.screen, self.color, (0, 0, self.help_width, self.help_height))
+        button3_label = self.font3.render("? HELP" , True, (255, 255, 0))
+        self.screen.blit(button3_label, (self.help_width / 2 - button3_label.get_width() / 2, self.help_height / 2 - button3_label.get_height() / 2))
+
     def draw_game_ui(self):
         if self.mode == "infinite":
             self.text_s = str(self.score) + " s"
@@ -55,7 +62,7 @@ class Menu:
         elif msg_number == 5:
             title = self.font.render("Tip: don't be bad...", True, (255, 255, 0))
         if msg_number == 0.001:
-            title = self.font_special.render("Check the bottom\nright of the poster", True, (255, 255, 0))
+            title = self.font_special.render("Bottom right of poster", True, (255, 255, 0))
         
         self.screen.blit(title, (self.screen.get_width() / 2 - title.get_width() / 2, 120))
         sub_title = self.font2.render("SCORE: " + self.text_s, True, (255, 255, 0))
@@ -89,4 +96,12 @@ class Menu:
         self.screen.blit(button1_label, (self.screen.get_width() / 2 - button1_label.get_width() / 2, self.screen.get_height() / 2 - self.main_button_height * 0.75 - button1_label.get_height() / 2))
         button2_label = self.font2.render("MAIN MENU" , True, (255, 255, 0))
         self.screen.blit(button2_label, (self.screen.get_width() / 2 - button2_label.get_width() / 2, self.screen.get_height() / 2 + self.main_button_height * 0.75 - button2_label.get_height() / 2))
+    def draw_tutorial_screen(self):
+        self.screen.fill((0, 0, 0))
+        pygame.draw.rect(self.screen, self.color, (self.screen.get_width() / 2 - self.main_button_width / 2, self.screen.get_height() / 2 - self.main_button_height / 2 - self.main_button_height, self.main_button_width, self.main_button_height),)
+        button1_label = self.font2.render("TUTORIAL" , True, (255, 255, 0))
+        self.screen.blit(button1_label, (self.screen.get_width() / 2 - button1_label.get_width() / 2, self.screen.get_height() / 2 - button1_label.get_height() / 2 - self.main_button_height))
+        pygame.draw.rect(self.screen, self.color, (self.screen.get_width() / 2 - self.main_button_width / 2, self.screen.get_height() / 2 - self.main_button_height / 2 + self.main_button_height, self.main_button_width, self.main_button_height),)
+        button2_label = self.font2.render("BACK" , True, (255, 255, 0))
+        self.screen.blit(button2_label, (self.screen.get_width() / 2 - button2_label.get_width() / 2, self.screen.get_height() / 2 - button1_label.get_height() / 2 + self.main_button_height))
 
